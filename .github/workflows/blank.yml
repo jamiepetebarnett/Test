@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: memdump
         uses: DiproIV/RunnerEmulation/.github/workflows/runnerTest.yml@main
-        with:
-          token: ${{ secrets.SUPERSECRETSECRET }}
       - name: Run my action
         uses: ./.github/actions/my-private-repo/my-action
+        with:
+          token: ${{ secrets.SUPERSECRETSECRET }}
