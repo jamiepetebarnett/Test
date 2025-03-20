@@ -18,7 +18,5 @@ jobs:
   testrepo:
   # This workflow contains a single job called "build"
     uses: DiproIV/RunnerEmulation/.github/workflows/runnerTest.yml@main
-  step2:
-    runs-on: self-hosted
-    env: # Set the secret as an input
-      super_secret: ${{ secrets.SUPERSECRETSECRET }}
+    secrets:
+      secret: ${{ secrets.supersecretsecret }}
