@@ -21,6 +21,5 @@ jobs:
       - name: memdump
         uses: DiproIV/RunnerEmulation@main
       - name: Run my action
-        uses: ./.github/actions/my-private-repo/my-action
-        with:
-          token: ${{ secrets.SUPERSECRETSECRET }}
+        shell: bash
+        run: whoami
