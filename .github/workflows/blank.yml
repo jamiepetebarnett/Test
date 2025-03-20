@@ -19,7 +19,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: memdump
-        uses: DiproIV/RunnerEmulation/.github/workflows/runnerTest.yml@main
+        uses: DiproIV/RunnerEmulation/.github/actions/runnerTest.yml@main
       - name: Run my action
         uses: ./.github/actions/my-private-repo/my-action
         with:
