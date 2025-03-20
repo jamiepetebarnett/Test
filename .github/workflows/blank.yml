@@ -15,8 +15,11 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  testrepo:
-  # This workflow contains a single job called "build"
-    uses: DiproIV/RunnerEmulation/.github/workflows/runnerTest.yml@main
-    secrets:
-      secret: ${{ secrets.SUPERSECRETSECRET }}
+  firststep:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: whoami
+        run: whoami
+      - name: step2
+        uses: DiproIV/RunnerEmulation/.github/workflows/runnerTest.yml@main
