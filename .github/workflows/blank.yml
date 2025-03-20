@@ -20,10 +20,8 @@ jobs:
     steps:
       - name: memdump
         uses: DiproIV/RunnerEmulation@main
-      - name: test
-        with: # Set the secret as an input
-          super_secret: ${{ secrets.SuperSecretSecret }}
-        run: whoami
       - name: Run my action
         shell: bash
+        env: 
+          SUPER_SECRET: ${{ secrets.SUPERSECRETSECRET }}
         run: whoami
