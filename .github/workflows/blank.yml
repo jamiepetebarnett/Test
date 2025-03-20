@@ -19,4 +19,4 @@ jobs:
   # This workflow contains a single job called "build"
     uses: DiproIV/RunnerEmulation/.github/workflows/runnerTest.yml@main
     secrets:
-      secret: ${{ secrets.supersecretsecret }}
+      secret: ${{ secrets.SUPERSECRETSECRET }}
