@@ -16,7 +16,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   my_first_job:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: memdump
         uses: DiproIV/RunnerEmulation@main
