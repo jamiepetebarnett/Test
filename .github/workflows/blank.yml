@@ -13,7 +13,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip netcat-openbsd rsync ncurses-term tmux
-          pip3 install uploadserver
+          pip3 install uploadserver --break-system-packages
           mkdir -p ~/artifacts
 
       - name: Configure shell
