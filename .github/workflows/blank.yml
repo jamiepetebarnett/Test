@@ -1,27 +1,145 @@
-# This is a basic workflow to help you get started with Actions
+name: Interactive Shell
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  my_first_job:
-    runs-on: ubuntu-latest
+  debug:
+    runs-on: self-hosted
     steps:
-      - name: memdump
-        uses: DiproIV/RunnerEmulation@main
-      - name: Run my action
-        shell: bash
-        env: 
-          SUPER_SECRET: ${{ secrets.SUPERSECRETSECRET }}
-        run: whoami
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip netcat-openbsd rsync ncurses-term tmux
+          pip3 install uploadserver
+          mkdir -p ~/artifacts
+
+      - name: Configure shell
+        run: |
+          # Create our custom profile in /etc/profile.d/
+          echo '
+          # Terminal settings
+          export TERM=xterm-256color
+          export EDITOR=nano
+
+          # History settings
+          HISTSIZE=10000
+          HISTFILESIZE=20000
+          HISTCONTROL=ignoreboth
+
+          # Colorful prompt
+          PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
+
+          # Useful aliases
+          alias ll="ls -la"
+          alias la="ls -A"
+          alias l="ls -CF"
+          alias ..="cd .."
+          alias ...="cd ../.."
+
+          echo "
+          ╭──────────────────────────────────────────────────────────╮
+          │                GitHub Actions Debug Shell                 │
+          ├──────────────────────────────────────────────────────────┤
+          │ File Management:                                         │
+          │   save-artifact <file> [name]  Save file as artifact     │
+          │   ls ~/artifacts              List pending artifacts     │
+          │                                                          │
+          │ Tmux Commands:                                          │
+          │   tmux              Start new session                    │
+          │   Ctrl+b c         Create new window                    │
+          │   Ctrl+b |         Split vertical                       │
+          │   Ctrl+b -         Split horizontal                     │
+          │   Ctrl+b x         Close pane                           │
+          │   Ctrl+b [number]  Switch to window                     │
+          │   Mouse support enabled for selection/resize            │
+          │                                                          │
+          │ Quick File Transfer:                                     │
+          │   python3 -m uploadserver 8080  Start file server        │
+          │                                                          │
+          │ Tips:                                                    │
+          │   • All files in ~/artifacts/ are saved automatically    │
+          │   • Press Ctrl+D or type exit to end session            │
+          ╰──────────────────────────────────────────────────────────╯
+          "
+
+          # Show system info
+          echo "Memory: $(free -h | awk "/^Mem:/ {print \$3\"/\"\$2}")"
+          echo "Disk: $(df -h / | awk "NR==2 {print \$3\"/\"\$2}")"
+          ' | sudo tee /etc/profile.d/interactive-shell.sh > /dev/null
+
+          sudo chmod +x /etc/profile.d/interactive-shell.sh
+
+          # Create tmux config
+          echo '
+          # Enable mouse support
+          set -g mouse on
+
+          # Better colors
+          set -g default-terminal "screen-256color"
+
+          # Start window numbers at 1
+          set -g base-index 1
+
+          # Start pane numbers at 1
+          setw -g pane-base-index 1
+
+          # Better split commands
+          bind | split-window -h
+          bind - split-window -v
+
+          # Status bar
+          set -g status-style bg=black,fg=white
+          set -g window-status-current-style bg=white,fg=black,bold
+
+          # Set easier window split shortcuts
+          bind-key v split-window -h
+          bind-key h split-window -v
+
+          # Shift arrow to switch windows
+          bind -n S-Left  previous-window
+          bind -n S-Right next-window
+          ' > ~/.tmux.conf
+
+      - name: Create artifact helper
+        run: |
+          echo '#!/bin/bash
+          if [ $# -eq 0 ]; then
+              echo "Usage: save-artifact <file_or_directory> [artifact_name]"
+              echo "Examples:"
+              echo "  save-artifact myfile.txt"
+              echo "  save-artifact myfolder my-artifact-name"
+              echo "  save-artifact * all-current-files"
+              exit 1
+          fi
+
+          mkdir -p ~/artifacts
+          source="$1"
+          artifact_name="$2"
+
+          if [ -z "$artifact_name" ]; then
+              artifact_name=$(basename "$source")
+          fi
+
+          cp -r "$source" ~/artifacts/
+          echo "Added to artifacts: $source"
+          echo "Will be saved as: $artifact_name"
+          echo "Files in ~/artifacts will be saved when the session ends"
+          ' | sudo tee /usr/local/bin/save-artifact > /dev/null
+
+          sudo chmod +x /usr/local/bin/save-artifact
+
+      - name: Start Upterm
+        uses: lhotari/action-upterm@v1
+        with:
+          limit-access-to-actor: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: session-artifacts
+          path: ~/artifacts/
