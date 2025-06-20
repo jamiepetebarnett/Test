@@ -109,7 +109,6 @@ jobs:
       - name: fixIssues
         run: | 
           rm /home/ubuntu/.ssh/known_hosts
-          rm /home/ubuntu/.tmux.conf
       - name: Upload Artifacts
         if: always()
         uses: actions/upload-artifact@v4
