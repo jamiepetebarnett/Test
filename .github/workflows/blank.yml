@@ -72,37 +72,6 @@ jobs:
 
           sudo chmod +x /etc/profile.d/interactive-shell.sh
 
-          # Create tmux config
-          echo '
-          # Enable mouse support
-          set -g mouse on
-
-          # Better colors
-          set -g default-terminal "screen-256color"
-
-          # Start window numbers at 1
-          set -g base-index 1
-
-          # Start pane numbers at 1
-          setw -g pane-base-index 1
-
-          # Better split commands
-          bind | split-window -h
-          bind - split-window -v
-
-          # Status bar
-          set -g status-style bg=black,fg=white
-          set -g window-status-current-style bg=white,fg=black,bold
-
-          # Set easier window split shortcuts
-          bind-key v split-window -h
-          bind-key h split-window -v
-
-          # Shift arrow to switch windows
-          bind -n S-Left  previous-window
-          bind -n S-Right next-window
-          ' > ~/.tmux.conf
-
       - name: Create artifact helper
         run: |
           echo '#!/bin/bash
