@@ -135,7 +135,7 @@ jobs:
         uses: lhotari/action-upterm@v1
         with:
           limit-access-to-actor: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Artifacts
         if: always()
